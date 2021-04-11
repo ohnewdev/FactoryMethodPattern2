@@ -24,14 +24,13 @@ namespace FactoryMethodPattern2
         static void Main(string[] args)
         {
 
-            ItemCreator creator;
+            AbstItemCreator creator = new ItemCreator();
             Item item;
-            creator = new HpCreator();
-            item = creator.Create();
+
+            item = creator.Create("HP");
             item.Use();
 
-            creator = new MpCreator();
-            item = creator.Create();
+            item = creator.Create("MP");
             item.Use();
 
             Console.ReadKey();
@@ -41,28 +40,28 @@ namespace FactoryMethodPattern2
 
 
 
-    public abstract class ItemCreator
+    public abstract class AbstItemCreator
     {
 
         // 팩토리 메소드 -> 템플릿 메소드
-        public Item Create()
+        public Item Create(string type)
         {
             Item item;
 
 
             //step1
-            requestItemInfo();
+            requestItemInfo(type);
             //step2
-            item = createItem();
+            item = createItem(type);
             //step3
-            createItemLog();
+            createItemLog(type);
             return item;
         }
 
-        abstract protected void requestItemInfo();
-        abstract protected void createItemLog();
+        abstract protected void requestItemInfo(string type);
+        abstract protected void createItemLog(string type);
 
-        abstract protected Item createItem();
+        abstract protected Item createItem(string type);
     }
 
 
@@ -71,12 +70,37 @@ namespace FactoryMethodPattern2
         public void Use();
     }
 
+    public class ItemCreator : AbstItemCreator
+    {
+        protected override Item createItem(string type)
+        {
+            switch (type)
+            {
+                case "MP":
+                    return new MpPotion();
+                case "HP":
+                    return new HpPotion();
 
+            }
+            return null;
+
+        }
+
+        protected override void createItemLog(string type)
+        {
+            Console.WriteLine(type + "물약 만들었습니다. " + DateTime.Now);
+        }
+
+        protected override void requestItemInfo(string type)
+        {
+            Console.WriteLine($"데이터베이스에서 {type}물약 정보를 가져옵니다. {DateTime.Now}");
+        }
+    }
     public class HpPotion : Item
     {
         public void Use()
         {
-            Console.WriteLine("체력회복");
+            Console.WriteLine("체력을 회복하였습니다. ");
         }
     }
 
@@ -84,51 +108,8 @@ namespace FactoryMethodPattern2
     {
         public void Use()
         {
-            Console.WriteLine("마력회복");
+            Console.WriteLine("마력을 회복하였습니다");
         }
     }
 
-
-    // 위에 2가지를 생성하기 위해. 
-
-    public class HpCreator : ItemCreator
-    {
-        protected override Item createItem()
-        {
-            Console.WriteLine("체력 물약 생성....");
-            return new HpPotion();
-
-        }
-
-        protected override void createItemLog()
-        {
-            Console.WriteLine("체력물약 만들었습니다. " + DateTime.Now);
-        }
-
-        protected override void requestItemInfo()
-        {
-            Console.WriteLine("데이터베이스에서 체력물약 정보를 가져옵니다. " + DateTime.Now);
-        }
-
-
-    }
-    public class MpCreator : ItemCreator
-    {
-        protected override Item createItem()
-        {
-            Console.WriteLine("마력 물약 생성....");
-            return new MpPotion();
-
-        }
-
-        protected override void createItemLog()
-        {
-            Console.WriteLine("마력물약 만들었습니다. " + DateTime.Now);
-        }
-
-        protected override void requestItemInfo()
-        {
-            Console.WriteLine("데이터베이스에서 마력물약 정보를 가져옵니다. " + DateTime.Now);
-        }
-    }
 }
